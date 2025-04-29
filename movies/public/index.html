@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Movie List</title>
+</head>
+
+<body>
+
+    <h1>Movie List</h1>
+
+    <ul id="movie-list"></ul>
+
+    <h2>Add a Movie</h2>
+    <form id="movie-form">
+        <input type="text" id="title" placeholder="Title" required />
+        <input type="text" id="description" placeholder="Description" required />
+        <button type="submit">Add Movie</button>
+    </form>
+
+    <script>
+        const API_URL = '/api/movies'; // since frontend and backend are served from same server
+
+        // Function to load movies
+        async function loadMovies() {
+            const response = await fetch(API_URL);
+            const movies = await response.json();
+
+            const list = document.getElementById('movie-list');
+            list.innerHTML = '';
+
+            movies.forEach(movie => {
+                const li = document.createElement('li');
+                li.textContent = `${movie.title}: ${movie.description}`;
+                list.appendChild(li);
+            });
+        }
+
+        // Form submit handler
+        document.getElementById('movie-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description })
+            });
+
+            // Clear form
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+
+            // Reload movies
+            loadMovies();
+        });
+
+        // Load movies on page load
+        loadMovies();
+    </script>
+
+</body>
+
+</html>
