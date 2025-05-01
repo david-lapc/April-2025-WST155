@@ -1,8 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const app = express();
+
+//cors for all origins
+app.use(cors());
+
 const Movie = require('./models/movie.model.js');
 const env = require('dotenv').config();
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -61,8 +67,8 @@ app.get('/api/movies/:id', async (req, res) => {
 app.post('/api/movies', async (req, res) => {
 
     try {
-        const { title, year, plot } = req.body;
-        const newMovie = await Movie.create({ title, year, plot });
+        const { title, year, plot, imgUrl } = req.body;
+        const newMovie = await Movie.create({ title, year, plot, imgUrl });
         res.status(201).json(newMovie);
     } catch (err) {
         console.error('Error adding movie:', err);

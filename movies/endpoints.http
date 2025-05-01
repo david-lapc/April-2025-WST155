@@ -17,5 +17,6 @@ Content-Type: application/json
     {
     "title": "Jurassic Park",
     "year": 1993,
-    "plot": "During a preview tour, a theme park suffers a major power breakdown that allows its cloned dinosaur exhibits to run amok."
+    "plot": "During a preview tour, a theme park suffers a major power breakdown that allows its cloned dinosaur exhibits to run amok.",
+    "imgUrl": "https://m.media-amazon.com/images/M/MV5BMTYzNTQ1NzY4OF5BMl5BanBnXkFtZTcwNjA2MjE3NA@@._V1_.jpg"
     }

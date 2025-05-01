@@ -3,62 +3,204 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Movie List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        main {
+            max-width: 100%;
+            width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            padding: 20px;
+            background-color: aliceblue;
+            display: flex;
+            flex-direction: column;
+        }
+
+        input,
+        textarea {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        #movieList {
+            background-color: #d4ddf0;
+            color: #fff;
+            padding: 20px;
+            border-radius: 30px;
+        }
+
+        .movie-item {
+            margin: 10px 0;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 20px;
+        }
+
+        .movie-item h3 {
+            text-align: center;
+            color: #fff;
+        }
+
+        .movie-item img {
+            max-width: 100%;
+            display: block;
+            margin: auto;
+        }
+
+        .movie-item p {
+            text-align: left;
+        }
+    </style>
+
 </head>
 
 <body>
 
-    <h1>Movie List</h1>
+    <main>
+        <h1>Add Movies</h1>
 
-    <ul id="movie-list"></ul>
+        <!-- Form for collecting movie info-->
+        <form>
+            <input type="text" placeholder="Movie Title" id="movieTitle" required>
+            <textarea placeholder="Movie Description" id="movieDescription" required></textarea>
+            <input type="text" placeholder="Movie Year" id="movieYear" required>
+            <input type="text" placeholder="imageUrl" id="imageUrl" required>
+            <input type="submit">
+        </form>
 
-    <h2>Add a Movie</h2>
-    <form id="movie-form">
-        <input type="text" id="title" placeholder="Title" required />
-        <input type="text" id="description" placeholder="Description" required />
-        <button type="submit">Add Movie</button>
-    </form>
+        <h2>Movie List</h2>
+
+        <!-- Movie list display area -->
+        <div id="movieList">
+
+        </div>
+
+    </main>
 
     <script>
-        const API_URL = '/api/movies'; // since frontend and backend are served from same server
 
-        // Function to load movies
-        async function loadMovies() {
-            const response = await fetch(API_URL);
-            const movies = await response.json();
+        // JavaScript code to handle form submission and local storage
+        // Select the form and input elements
+        const form = document.querySelector('form');
+        let movieTitleElement = document.getElementById('movieTitle');
+        let movieDescriptionElement = document.getElementById('movieDescription');
+        let movieYearElement = document.getElementById('movieYear');
+        let imageUrlElement = document.getElementById('imageUrl');
 
-            const list = document.getElementById('movie-list');
-            list.innerHTML = '';
+        // Initialize an empty movie list
+        // and select the movie list display area
+        let movieList = [];
+        let movieListElement = document.getElementById('movieList');
 
-            movies.forEach(movie => {
-                const li = document.createElement('li');
-                li.textContent = `${movie.title}: ${movie.description}`;
-                list.appendChild(li);
+        // Check if there is a movie list in local storage
+        // If there is, parse it and assign it to the movieList variable
+        let localStorageMovieList = localStorage.getItem('movieList');
+
+        if (localStorageMovieList) {
+            movieList = JSON.parse(localStorageMovieList); // Retrieve the movie list from local storage
+        }
+
+        // Function to render the movie list on the page
+        // This function creates a new div for each movie and appends it to the movie list display area
+        function renderMovieList() {
+            movieListElement.innerHTML = ''; // Clear the movie list display
+            movieList.forEach(function (movie) {
+                let movieItem = document.createElement('div');
+                movieItem.classList.add('movie-item'); // Add a class to the movie item for styling
+
+                // Create elements for movie title, description, year, and image
+                let movieTitle = document.createElement('h3');
+                let movieDescription = document.createElement('p');
+                let movieYear = document.createElement('p');
+                let movieImage = document.createElement('img');
+
+                movieTitle.textContent = movie.title; // Set the text content to the movie title
+                movieDescription.textContent = movie.description; // Set the text content to the movie description
+                movieYear.textContent = movie.year; // Set the text content to the movie year
+                movieImage.src = movie.imageUrl; // Set the image source to the movie image URL
+                movieImage.alt = movie.title; // Set the alt text to the movie title
+
+                movieItem.appendChild(movieTitle); // Append the movie title to the movie item
+                movieItem.appendChild(movieDescription); // Append the movie description to the movie item
+                movieItem.appendChild(movieYear); // Append the movie year to the movie item
+                movieItem.appendChild(movieImage); // Append the movie image to the movie item
+
+                movieListElement.appendChild(movieItem); // Append the movie item to the movie list display
+
             });
         }
 
-        // Form submit handler
-        document.getElementById('movie-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
+        renderMovieList(); // Call the function to render the movie list on page load
 
-            await fetch(API_URL, {
+        // Add an event listener to the form to handle form submission
+        // When the form is submitted, prevent the default action and add the movie to the list
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get the values from the input fields
+            // and assign them to variables
+            const movieTitle = movieTitleElement.value;
+            const movieDescription = movieDescriptionElement.value;
+            const movieYear = movieYearElement.value;
+            const imageUrl = imageUrlElement.value;
+
+            movieList.push({ title: movieTitle, description: movieDescription, year: movieYear, imageUrl: imageUrl }); // Add the movie title to the list
+
+            localStorage.setItem('movieList', JSON.stringify(movieList)); // Store the movie list in local storage
+
+            //api call to add the movie to the database
+            fetch('http://localhost:3333/api/movies', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, description })
-            });
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: movieTitle, year: movieYear, plot: movieDescription, imgUrl: imageUrl })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Movie added:', data); // Log the response from the API
+                })
+                .catch(error => {
+                    console.error('Error adding movie:', error); // Log any errors that occur
+                });
 
-            // Clear form
-            document.getElementById('title').value = '';
-            document.getElementById('description').value = '';
+            renderMovieList(); // Render the updated movie list
 
-            // Reload movies
-            loadMovies();
+            movieTitleElement.value = ''; // Clear the input field
+
+
+
         });
 
-        // Load movies on page load
-        loadMovies();
     </script>
 
 </body>
